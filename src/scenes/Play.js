@@ -3,6 +3,13 @@ class Play extends Phaser.Scene{
         super("playScene")
     }
 
+    preload(){
+        //load images and tile sprites
+        this.load.image('rocket','./assets/rocket.png')
+        this.load.image('spaceship','./assets/spaceship.png')
+        this.load.image('starfield','./assets/starfield.png')
+    }
+
     create(){
         //this.add.text(20,20,"Rocket Patrol Play")
 
@@ -14,7 +21,7 @@ class Play extends Phaser.Scene{
         this.add.rectangle(0, game.config.height - borderUISize, game.config.width, borderUISize, 0xFFFFFF).setOrigin(0, 0)
         this.add.rectangle(0, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0)
         this.add.rectangle(game.config.width - borderUISize, 0, borderUISize, game.config.height, 0xFFFFFF).setOrigin(0, 0)
-        
+
         
 
     }
