@@ -1,3 +1,6 @@
+//keyboard variables
+let keyF, keyR, keyLEFT, keyRIGHT
+
 let config = {
     type: Phaser.CANVAS,
     width: 640,
