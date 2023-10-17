@@ -37,4 +37,10 @@ class Rocket extends Phaser.GameObjects.Sprite {
             this.y = game.config.height - borderUISize - borderPadding
         }
     }
+
+    //reset Rocket to ground upon collision
+    reset(){
+        this.isFiring = false
+        this.y = game.config.height - borderPadding - borderUISize
+    }
   }
