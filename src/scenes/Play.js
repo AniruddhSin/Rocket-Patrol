@@ -83,6 +83,13 @@ class Play extends Phaser.Scene{
             this.gameOver = true
         }, null, this)
 
+        //double spaceship speed after 30 seconds
+        this.speedUpShips = this.time.delayedCall(game.settings.gameTimer/2, () => {
+            this.ship1.moveSpeed *= 2
+            this.ship2.moveSpeed *= 2
+            this.ship3.moveSpeed *= 2
+            //console.log("speed!!")
+        })
     }
 
     update(){
