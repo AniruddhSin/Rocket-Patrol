@@ -10,6 +10,8 @@ class Play extends Phaser.Scene{
         this.load.image('starfield','./assets/starfield.png')
         this.load.spritesheet('explosion','./assets/explosion.png', 
         {frameWidth: 64, frameHeight: 32, startFrame: 0, endFrame: 9})
+        this.load.image('UFO','./assets/UFO.png')
+        this.load.atlas('particle', './assets/flares.png', './assets/flares.json');
     }
 
     create(){
@@ -33,12 +35,15 @@ class Play extends Phaser.Scene{
         'rocket').setOrigin(0.5,0)
 
         //add spaceships
-        this.ship1 = new Spaceship(this,game.config.width + borderUISize*6, borderUISize*4, 
+        this.ship1 = new Spaceship(this,game.config.width + borderUISize*6, borderUISize*5, 
             'spaceship',0,30).setOrigin(0,0)
-        this.ship2 = new Spaceship(this,game.config.width + borderUISize*3, borderUISize*5 + borderPadding*2, 
+        this.ship2 = new Spaceship(this,game.config.width + borderUISize*3, borderUISize*6 + borderPadding*2, 
             'spaceship',0,20).setOrigin(0,0)
-        this.ship3 = new Spaceship(this,game.config.width, borderUISize*6 + borderPadding*4, 
+        this.ship3 = new Spaceship(this,game.config.width, borderUISize*7 + borderPadding*4, 
             'spaceship',0,10).setOrigin(0,0)
+        this.ufo = new Spaceship(this,game.config.width - borderUISize, borderUISize*4,
+            'UFO',0,100).setOrigin(0,0)
+        this.ufo.moveSpeed = game.settings.spaceshipSpeed * 1.5
 
         //defining keys
         keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F)
@@ -83,13 +88,22 @@ class Play extends Phaser.Scene{
             this.gameOver = true
         }, null, this)
 
+        //display clock
+        this.timeLeft = this.add.text(game.config.width - borderPadding - borderUISize*2, borderUISize + borderPadding*2,
+            this.clock.getRemainingSeconds, scoreConfig)
+
+
+        this.explodeSpeed = 400
         //double spaceship speed after 30 seconds
         this.speedUpShips = this.time.delayedCall(game.settings.gameTimer/2, () => {
             this.ship1.moveSpeed *= 2
             this.ship2.moveSpeed *= 2
             this.ship3.moveSpeed *= 2
+            this.ufo.moveSpeed *= 2
+            this.explodeSpeed *= 2
             //console.log("speed!!")
         })
+
     }
 
     update(){
@@ -104,6 +118,7 @@ class Play extends Phaser.Scene{
             this.ship1.update()
             this.ship2.update()
             this.ship3.update()
+            this.ufo.update()
         }
 
         //Checking Collisions
@@ -122,10 +137,17 @@ class Play extends Phaser.Scene{
             this.p1Rocket.reset()
             this.shipExplode(this.ship3)
         }
+        if(this.checkCollision(this.p1Rocket, this.ufo)){
+            this.p1Rocket.reset()
+            this.shipExplode(this.ufo)
+        }
 
         if(this.gameOver && Phaser.Input.Keyboard.JustDown(keyLEFT)){
             this.scene.start('menuScene')
         }
+
+        //Update Timer
+        this.timeLeft.text = Math.floor(this.clock.getRemainingSeconds())
     }
 
     checkCollision(rocket, ship){
@@ -145,16 +167,29 @@ class Play extends Phaser.Scene{
         // temporarily hide ship
         ship.alpha = 0
         // create explosion sprite at ship's position
-        let boom = this.add.sprite(ship.x, ship.y, 'explosion').setOrigin(0, 0)
+        /*let boom = this.add.sprite(ship.x, ship.y, 'explosion').setOrigin(0, 0)
         boom.anims.play('explode')             // play explode animation
         boom.on('animationcomplete', () => {    // callback after anim completes
           ship.reset()                         // reset ship position
           ship.alpha = 1                       // make ship visible again
           boom.destroy()                       // remove explosion sprite
+        })*/
+        let emission = this.add.particles(ship.x,ship.y,'particle',{
+            frame: ['white'],
+            lifespan: 300,
+            blendMode: 'ADD',
+            gravityY: 50,
+            speed: {min: 100, max: this.explodeSpeed},
+            scale: {start: 0.3, end: 0},
+            emitting: false
         })
+        emission.explode(16)
+        ship.reset()
+        ship.alpha = 1
         // update score
         this.p1Score += ship.points
         this.scoreLeft.text = this.p1Score
+        this.clock.delay = this.clock.delay + 1000
 
         //play explosion sound
         this.sound.play('sfx_explosion')
