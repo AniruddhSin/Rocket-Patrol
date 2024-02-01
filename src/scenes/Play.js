@@ -176,7 +176,7 @@ class Play extends Phaser.Scene{
         })*/
         let emission = this.add.particles(ship.x,ship.y,'particle',{
             frame: ['white'],
-            lifespan: 300,
+            lifespan: 3000,
             blendMode: 'ADD',
             gravityY: 50,
             speed: {min: 100, max: this.explodeSpeed},
